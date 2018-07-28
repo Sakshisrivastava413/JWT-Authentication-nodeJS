@@ -9,7 +9,7 @@ app.get('/api', function (req, res) {
   });
 });
 
-app.post('/api/post', function (req, res) {
+app.post('/api/post', verifyToken, function (req, res) {
   res.json({
     message: "Post created ..."
   });
@@ -30,7 +30,14 @@ app.post('/api/login', function (req, res) {
   });
 });
 
+function verifyToken(req, res, next) {
+  const bearerHeader = req.headers['authorization'];
+  if (typeof bearerHeader != 'undefined') {
 
+  } else {
+    res.sendStatus(403);
+  }
+}
 
 app.listen(process.env.port || 5000,
   () => { console.log("server started on port 5000") })
