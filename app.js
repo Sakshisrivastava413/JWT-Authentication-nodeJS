@@ -10,9 +10,16 @@ app.get('/api', function (req, res) {
 });
 
 app.post('/api/post', verifyToken, function (req, res) {
-  res.json({
-    message: "Post created ..."
-  });
+  jwt.verify(req.token, 'secretkey', (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      res.json({
+        message: "Post created ...",
+        authData
+      });
+    }
+  })
 });
 
 app.post('/api/login', function (req, res) {
@@ -30,11 +37,24 @@ app.post('/api/login', function (req, res) {
   });
 });
 
-function verifyToken(req, res, next) {
-  const bearerHeader = req.headers['authorization'];
-  if (typeof bearerHeader != 'undefined') {
+// FORMAT OF TOKEN
+// Authorization: Bearer <access_token>
 
+function verifyToken(req, res, next) {
+  // get auth header value
+  const bearerHeader = req.headers['authorization'];
+  // check if bearer is undefined
+  if (typeof bearerHeader != 'undefined') {
+    // split at the space
+    const bearer = bearerHeader.split(' ');
+    // get token from array
+    const bearerToken = bearer[1];
+    // set the token
+    req.token = bearerToken
+    // next the middleware
+    next();
   } else {
+    // forbidden
     res.sendStatus(403);
   }
 }
